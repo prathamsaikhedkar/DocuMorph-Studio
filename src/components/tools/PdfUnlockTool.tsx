@@ -22,7 +22,6 @@ import { formatFileSize } from '../../utils/imageCompressor';
 
 export const PdfUnlockTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer | null>(null);
   const [isProtected, setIsProtected] = useState<boolean | null>(null);
   const [pageCount, setPageCount] = useState<number | null>(null);
 
@@ -55,8 +54,6 @@ export const PdfUnlockTool: React.FC = () => {
 
     try {
       const buf = await selected.arrayBuffer();
-      setArrayBuffer(buf);
-
       const check = await checkPdfPasswordProtection(buf);
       setIsProtected(check.isProtected);
       setPageCount(check.pageCount || null);
@@ -68,14 +65,15 @@ export const PdfUnlockTool: React.FC = () => {
   };
 
   const handleUnlock = async () => {
-    if (!arrayBuffer || !file) return;
+    if (!file) return;
     setPasswordError(null);
     setIsProcessing(true);
     setProgress(null);
 
     try {
+      const freshBuffer = await file.arrayBuffer();
       const result = await decryptAndUnlockPdf(
-        arrayBuffer,
+        freshBuffer,
         password,
         {
           resolutionMultiplier: fidelity,
@@ -140,7 +138,6 @@ export const PdfUnlockTool: React.FC = () => {
           <button
             onClick={() => {
               setFile(null);
-              setArrayBuffer(null);
               setIsProtected(null);
               setPassword('');
               setUnlockedResult(null);

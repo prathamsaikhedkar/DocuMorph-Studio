@@ -9,6 +9,13 @@ if (typeof window !== 'undefined') {
   ).toString();
 }
 
+/**
+ * Helper to clone buffer slice so PDF.js worker transfer never detaches original ArrayBuffer
+ */
+function getPdfJsData(buffer: ArrayBuffer): Uint8Array {
+  return new Uint8Array(buffer.slice(0));
+}
+
 export interface ImageToPdfItem {
   id: string;
   file: File;
@@ -187,7 +194,7 @@ export async function renderPdfToImages(
   format: 'image/jpeg' | 'image/png' = 'image/jpeg',
   onProgress?: (current: number, total: number) => void
 ): Promise<Array<{ pageNumber: number; blob: Blob; dataUrl: string; width: number; height: number }>> {
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) });
+  const loadingTask = pdfjsLib.getDocument({ data: getPdfJsData(pdfBuffer) });
   const pdf = await loadingTask.promise;
   const numPages = pdf.numPages;
   const results: Array<{ pageNumber: number; blob: Blob; dataUrl: string; width: number; height: number }> = [];
@@ -236,7 +243,7 @@ export async function renderPdfToImages(
 export async function getPdfThumbnails(
   pdfBuffer: ArrayBuffer
 ): Promise<Array<{ pageNumber: number; dataUrl: string; width: number; height: number }>> {
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) });
+  const loadingTask = pdfjsLib.getDocument({ data: getPdfJsData(pdfBuffer) });
   const pdf = await loadingTask.promise;
   const numPages = pdf.numPages;
   const thumbnails: Array<{ pageNumber: number; dataUrl: string; width: number; height: number }> = [];
@@ -282,7 +289,7 @@ export interface PdfProtectionCheck {
  */
 export async function checkPdfPasswordProtection(buffer: ArrayBuffer): Promise<PdfProtectionCheck> {
   try {
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+    const loadingTask = pdfjsLib.getDocument({ data: getPdfJsData(buffer) });
     const pdf = await loadingTask.promise;
     return {
       isProtected: false,
@@ -339,7 +346,7 @@ export async function decryptAndUnlockPdf(
   const quality = options.quality || 0.92;
 
   const loadingTask = pdfjsLib.getDocument({
-    data: new Uint8Array(buffer),
+    data: getPdfJsData(buffer),
     password: password,
   });
 
@@ -435,7 +442,7 @@ export async function compressPdfPerPages(
   onProgress?: (current: number, total: number, latestStat?: PageCompressStat) => void
 ): Promise<PdfCompressResult> {
   const originalSize = buffer.byteLength;
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+  const loadingTask = pdfjsLib.getDocument({ data: getPdfJsData(buffer) });
   const pdf = await loadingTask.promise;
   const numPages = pdf.numPages;
 

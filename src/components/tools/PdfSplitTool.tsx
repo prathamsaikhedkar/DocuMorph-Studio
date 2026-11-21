@@ -21,7 +21,6 @@ interface PageThumbnail {
 
 export const PdfSplitTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set());
   const [rangeInput, setRangeInput] = useState<string>('');
@@ -39,8 +38,6 @@ export const PdfSplitTool: React.FC = () => {
 
     try {
       const buf = await selected.arrayBuffer();
-      setArrayBuffer(buf);
-
       const thumbs = await getPdfThumbnails(buf);
       setThumbnails(thumbs);
       // Select all by default
@@ -107,18 +104,19 @@ export const PdfSplitTool: React.FC = () => {
   };
 
   const handleExtract = async () => {
-    if (!arrayBuffer || selectedPages.size === 0) {
+    if (!file || selectedPages.size === 0) {
       alert('Please select at least 1 page to extract.');
       return;
     }
     setIsProcessing(true);
 
     try {
+      const freshBuffer = await file.arrayBuffer();
       const sortedPages = Array.from(selectedPages).sort((a, b) => a - b);
       const pageIndices = sortedPages.map((p) => p - 1); // 0-based for pdf-lib
 
       if (splitMode === 'single') {
-        const extractedBytes = await extractPdfPages(arrayBuffer, pageIndices);
+        const extractedBytes = await extractPdfPages(freshBuffer, pageIndices);
         setResultBytes(extractedBytes);
       } else {
         // Individual pages into ZIP
@@ -126,7 +124,7 @@ export const PdfSplitTool: React.FC = () => {
         const baseName = file?.name.replace(/\.pdf$/i, '') || 'document';
 
         for (const pageNum of sortedPages) {
-          const singlePageBytes = await extractPdfPages(arrayBuffer, [pageNum - 1]);
+          const singlePageBytes = await extractPdfPages(freshBuffer, [pageNum - 1]);
           zipFiles.push({
             name: `${baseName}_page_${pageNum}.pdf`,
             content: singlePageBytes,

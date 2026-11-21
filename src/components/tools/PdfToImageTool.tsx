@@ -21,7 +21,6 @@ interface RenderedImagePage {
 
 export const PdfToImageTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer | null>(null);
   const [format, setFormat] = useState<'image/jpeg' | 'image/png'>('image/jpeg');
   const [scale, setScale] = useState<number>(2.0); // 2x default for crisp quality
 
@@ -33,19 +32,18 @@ export const PdfToImageTool: React.FC = () => {
     if (files.length === 0) return;
     const selected = files[0];
     setFile(selected);
-    const buf = await selected.arrayBuffer();
-    setArrayBuffer(buf);
     setRenderedPages([]);
   };
 
   const handleConvert = async () => {
-    if (!arrayBuffer) return;
+    if (!file) return;
     setIsProcessing(true);
     setProgress({ current: 0, total: 0 });
 
     try {
+      const freshBuffer = await file.arrayBuffer();
       const pages = await renderPdfToImages(
-        arrayBuffer,
+        freshBuffer,
         scale,
         format,
         (current, total) => setProgress({ current, total })
@@ -97,7 +95,6 @@ export const PdfToImageTool: React.FC = () => {
           <button
             onClick={() => {
               setFile(null);
-              setArrayBuffer(null);
               setRenderedPages([]);
             }}
             className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"

@@ -34,7 +34,6 @@ type CompressionPreset = 'extreme' | 'balanced' | 'high' | 'custom';
 
 export const PdfPageCompressTool: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
-  const [arrayBuffer, setArrayBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [isLoadingThumbs, setIsLoadingThumbs] = useState<boolean>(false);
 
@@ -64,8 +63,6 @@ export const PdfPageCompressTool: React.FC = () => {
 
     try {
       const buf = await selected.arrayBuffer();
-      setArrayBuffer(buf);
-
       const thumbs = await getPdfThumbnails(buf);
       setThumbnails(thumbs);
     } catch (err) {
@@ -114,13 +111,14 @@ export const PdfPageCompressTool: React.FC = () => {
   };
 
   const handleCompress = async () => {
-    if (!arrayBuffer || !file) return;
+    if (!file) return;
     setIsProcessing(true);
     setProgress({ current: 0, total: thumbnails.length });
 
     try {
+      const freshBuffer = await file.arrayBuffer();
       const compressRes = await compressPdfPerPages(
-        arrayBuffer,
+        freshBuffer,
         {
           defaultQuality: globalQuality / 100,
           defaultScale: globalScale,
@@ -179,7 +177,6 @@ export const PdfPageCompressTool: React.FC = () => {
           <button
             onClick={() => {
               setFile(null);
-              setArrayBuffer(null);
               setThumbnails([]);
               setResult(null);
               setPageOverrides({});
