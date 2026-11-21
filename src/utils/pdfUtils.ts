@@ -1,4 +1,4 @@
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure PDF.js worker using ESM URL
@@ -522,4 +522,141 @@ export async function compressPdfPerPages(
     pageCount: numPages,
     pageStats,
   };
+}
+
+export interface PdfTextWatermarkOptions {
+  type: 'text';
+  text: string;
+  fontSize?: number;
+  opacity: number; // 0.05 to 1.0
+  rotationDegrees?: number; // e.g. 45, -45, 0
+  color?: { r: number; g: number; b: number };
+  pageScope: 'all' | 'first' | 'odd' | 'even' | 'custom';
+  customPages?: number[];
+}
+
+export interface PdfImageWatermarkOptions {
+  type: 'image';
+  imageBytes: ArrayBuffer;
+  imageFormat: 'png' | 'jpeg';
+  scale?: number; // 0.1 to 1.0
+  opacity: number;
+  rotationDegrees?: number;
+  pageScope: 'all' | 'first' | 'odd' | 'even' | 'custom';
+  customPages?: number[];
+}
+
+export type PdfWatermarkConfig = PdfTextWatermarkOptions | PdfImageWatermarkOptions;
+
+/**
+ * Adds text or logo watermark onto PDF pages client-side
+ */
+export async function watermarkPdf(
+  buffer: ArrayBuffer,
+  config: PdfWatermarkConfig
+): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const totalPages = pdfDoc.getPageCount();
+
+  let font: any = null;
+  if (config.type === 'text') {
+    font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  }
+
+  let embeddedImage: any = null;
+  if (config.type === 'image') {
+    if (config.imageFormat === 'png') {
+      embeddedImage = await pdfDoc.embedPng(config.imageBytes);
+    } else {
+      embeddedImage = await pdfDoc.embedJpg(config.imageBytes);
+    }
+  }
+
+  for (let i = 0; i < totalPages; i++) {
+    const pageNum = i + 1;
+
+    // Check page scope
+    let shouldWatermark = false;
+    if (config.pageScope === 'all') shouldWatermark = true;
+    else if (config.pageScope === 'first' && pageNum === 1) shouldWatermark = true;
+    else if (config.pageScope === 'odd' && pageNum % 2 !== 0) shouldWatermark = true;
+    else if (config.pageScope === 'even' && pageNum % 2 === 0) shouldWatermark = true;
+    else if (config.pageScope === 'custom' && config.customPages?.includes(pageNum)) shouldWatermark = true;
+
+    if (!shouldWatermark) continue;
+
+    const page = pdfDoc.getPage(i);
+    const { width, height } = page.getSize();
+
+    if (config.type === 'text') {
+      const text = config.text || 'CONFIDENTIAL';
+      const fontSize = config.fontSize || Math.max(20, Math.round(width * 0.08));
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+      const textHeight = font.heightAtSize(fontSize);
+      const c = config.color || { r: 0.8, g: 0.1, b: 0.1 };
+      const rot = config.rotationDegrees !== undefined ? config.rotationDegrees : 45;
+
+      page.drawText(text, {
+        x: width / 2 - (textWidth / 2) * Math.cos((rot * Math.PI) / 180),
+        y: height / 2 - (textHeight / 2) * Math.sin((rot * Math.PI) / 180),
+        size: fontSize,
+        font: font,
+        color: rgb(c.r, c.g, c.b),
+        opacity: Math.max(0.01, Math.min(1.0, config.opacity)),
+        rotate: degrees(rot),
+      });
+    } else if (config.type === 'image' && embeddedImage) {
+      const scale = config.scale || 0.35;
+      const imgWidth = embeddedImage.width * scale;
+      const imgHeight = embeddedImage.height * scale;
+      const rot = config.rotationDegrees !== undefined ? config.rotationDegrees : 0;
+
+      page.drawImage(embeddedImage, {
+        x: (width - imgWidth) / 2,
+        y: (height - imgHeight) / 2,
+        width: imgWidth,
+        height: imgHeight,
+        opacity: Math.max(0.01, Math.min(1.0, config.opacity)),
+        rotate: degrees(rot),
+      });
+    }
+  }
+
+  return await pdfDoc.save();
+}
+
+export interface PageOrganizeAction {
+  originalIndex: number; // 0-based
+  rotation: number;      // 0, 90, 180, 270 degrees
+}
+
+/**
+ * Reorders, rotates, and removes pages from a PDF
+ */
+export async function organizePdfPages(
+  buffer: ArrayBuffer,
+  actions: PageOrganizeAction[]
+): Promise<Uint8Array> {
+  const srcDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const newDoc = await PDFDocument.create();
+  newDoc.setProducer('DocuMorph Studio (Client-Side Organized)');
+
+  const indicesToCopy = actions.map((a) => a.originalIndex);
+  const copiedPages = await newDoc.copyPages(srcDoc, indicesToCopy);
+
+  for (let i = 0; i < copiedPages.length; i++) {
+    const page = copiedPages[i];
+    const action = actions[i];
+
+    // Apply rotation
+    if (action.rotation !== 0) {
+      const currentRotation = page.getRotation().angle;
+      const newRotation = (currentRotation + action.rotation) % 360;
+      page.setRotation(degrees(newRotation));
+    }
+
+    newDoc.addPage(page);
+  }
+
+  return await newDoc.save();
 }

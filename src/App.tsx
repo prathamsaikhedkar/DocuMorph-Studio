@@ -12,6 +12,9 @@ import {
   Lock,
   Unlock,
   TrendingDown,
+  Stamp,
+  RotateCw,
+  Sliders,
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { TOOLS } from './types';
@@ -21,8 +24,12 @@ import { ImageCropTool } from './components/tools/ImageCropTool';
 import { ImageDpiTool } from './components/tools/ImageDpiTool';
 import { ImageCompressTool } from './components/tools/ImageCompressTool';
 import { ImageResizeConvertTool } from './components/tools/ImageResizeConvertTool';
+import { ImageWatermarkTool } from './components/tools/ImageWatermarkTool';
+import { ImageFiltersTool } from './components/tools/ImageFiltersTool';
 import { PdfPageCompressTool } from './components/tools/PdfPageCompressTool';
 import { PdfUnlockTool } from './components/tools/PdfUnlockTool';
+import { PdfWatermarkTool } from './components/tools/PdfWatermarkTool';
+import { PdfOrganizeTool } from './components/tools/PdfOrganizeTool';
 import { PdfMergeTool } from './components/tools/PdfMergeTool';
 import { PdfSplitTool } from './components/tools/PdfSplitTool';
 import { PdfToImageTool } from './components/tools/PdfToImageTool';
@@ -59,10 +66,18 @@ export const App: React.FC = () => {
         return <Minimize2 className="w-4 h-4 text-purple-500" />;
       case 'image-convert':
         return <RefreshCw className="w-4 h-4 text-blue-500" />;
+      case 'image-watermark':
+        return <Stamp className="w-4 h-4 text-pink-500" />;
+      case 'image-filters':
+        return <Sliders className="w-4 h-4 text-amber-500" />;
       case 'pdf-compress':
         return <TrendingDown className="w-4 h-4 text-emerald-500" />;
       case 'pdf-unlock':
         return <Unlock className="w-4 h-4 text-amber-500" />;
+      case 'pdf-watermark':
+        return <Stamp className="w-4 h-4 text-rose-500" />;
+      case 'pdf-organize':
+        return <RotateCw className="w-4 h-4 text-cyan-500" />;
       case 'pdf-merge':
         return <Combine className="w-4 h-4 text-rose-500" />;
       case 'pdf-split':
@@ -86,10 +101,18 @@ export const App: React.FC = () => {
         return <ImageCompressTool />;
       case 'image-convert':
         return <ImageResizeConvertTool />;
+      case 'image-watermark':
+        return <ImageWatermarkTool />;
+      case 'image-filters':
+        return <ImageFiltersTool />;
       case 'pdf-compress':
         return <PdfPageCompressTool />;
       case 'pdf-unlock':
         return <PdfUnlockTool />;
+      case 'pdf-watermark':
+        return <PdfWatermarkTool />;
+      case 'pdf-organize':
+        return <PdfOrganizeTool />;
       case 'pdf-merge':
         return <PdfMergeTool />;
       case 'pdf-split':

@@ -46,28 +46,46 @@ A private, client-sided web application for image and PDF manipulation. All file
 - Convert image formats between PNG, JPG, and WebP with custom background handling for transparency.
 - Scale dimensions by percentage (25%, 50%, 75%, 100%) or exact pixel dimensions with lock-aspect ratio.
 
-### 6. Per-Page PDF Compressor
+### 6. Image Watermark & Signature Stamper
+- Stamp text or logo/signature watermarks onto images.
+- Customizable opacity, font size, rotation angle, and color.
+- Flexible placement: 9-point anchor grid or repeated tile pattern across the entire image.
+
+### 7. Image Filters & Color Adjustments
+- Fine-tune brightness, contrast, saturation, grayscale, sepia tone, invert, and hue rotation.
+- Quick 1-click filter presets: Vibrant, Vintage, B&W Film, Cool Tone, Warm Tone, and Dramatic.
+- Real-time hardware-accelerated preview with "Hold to Compare" feature.
+
+### 8. Per-Page PDF Compressor
 - Compress PDF documents page-by-page directly in your browser.
 - Global presets: **Extreme** (< 1MB email limit), **Recommended / Balanced** (70% quality, 1.5x scale), and **High Quality** (crisp text).
-- **Granular Per-Page Overrides**: Inspect thumbnails of every page and assign custom quality levels (Auto, Low, Medium, High) to individual pages (e.g., keep Page 1 high quality while compressing pages 2-10 aggressively).
+- **Granular Per-Page Overrides**: Inspect thumbnails of every page and assign custom quality levels (Auto, Low, Medium, High) to individual pages.
 - Real-time progress bar reporting current page being rendered and compressed.
-- Live space savings statistics (`-85%`, `-92%`) with side-by-side file size metrics.
 
-### 7. PDF Password Remover & Unlocker
+### 9. PDF Watermark & Page Stamper
+- Add text or logo watermarks across PDF pages with custom opacity, rotation, and colors.
+- Page application scope: All pages, first page only, odd/even pages, or custom page lists.
+
+### 10. PDF Page Organizer & Rotator
+- Visual card grid displaying all pages of the document.
+- Rotate individual pages or all pages simultaneously by 90° / 180° / 270°.
+- Reorder pages with interactive move controls and delete unwanted pages.
+
+### 11. PDF Password Remover & Unlocker
 - Permanently remove passwords and restrictions from password-protected PDFs (e.g. bank statements, salary slips, Aadhaar / ID docs, tax returns).
 - 100% Client-Side Decryption: Password and document contents never leave your device.
 - Automatic password detection upon file upload.
 - Preserves exact page dimensions, orientation, and layout.
 
-### 8. PDF Merger
+### 12. PDF Merger
 - Merge multiple PDF documents into a single document with drag-and-drop order adjustment.
 
-### 9. PDF Split & Page Extractor
+### 13. PDF Split & Page Extractor
 - Visual thumbnail gallery of every page in a PDF rendered client-side with PDF.js.
 - Select specific pages or define range queries (e.g. `1-3, 5, 8-10`).
 - Export to a single combined PDF or package each selected page into individual PDFs inside a ZIP.
 
-### 10. PDF to Images
+### 14. PDF to Images
 - Render each page of a PDF document to crisp JPEG or PNG images (1x, 2x, 3x multipliers).
 - Individual page download or batch ZIP download.
 

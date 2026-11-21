@@ -4,8 +4,12 @@ export type ToolId =
   | 'image-dpi'
   | 'image-compress'
   | 'image-convert'
+  | 'image-watermark'
+  | 'image-filters'
   | 'pdf-compress'
   | 'pdf-unlock'
+  | 'pdf-watermark'
+  | 'pdf-organize'
   | 'pdf-merge'
   | 'pdf-split'
   | 'pdf-to-image';
@@ -60,6 +64,22 @@ export const TOOLS: ToolDefinition[] = [
     icon: 'RefreshCw',
   },
   {
+    id: 'image-watermark',
+    name: 'Watermark Image',
+    category: 'image',
+    shortDesc: 'Stamp custom text or logo watermark with opacity & tiling.',
+    badge: 'New',
+    icon: 'Stamp',
+  },
+  {
+    id: 'image-filters',
+    name: 'Filters & Adjust',
+    category: 'image',
+    shortDesc: 'Fine-tune brightness, contrast, saturation, and vintage presets.',
+    badge: 'New',
+    icon: 'Sliders',
+  },
+  {
     id: 'pdf-compress',
     name: 'Compress PDF',
     category: 'pdf',
@@ -72,8 +92,23 @@ export const TOOLS: ToolDefinition[] = [
     name: 'Unlock PDF',
     category: 'pdf',
     shortDesc: 'Permanently remove passwords from protected PDF files.',
-    badge: 'New',
     icon: 'Unlock',
+  },
+  {
+    id: 'pdf-watermark',
+    name: 'Watermark PDF',
+    category: 'pdf',
+    shortDesc: 'Add text or logo watermarks across pages with custom opacity.',
+    badge: 'New',
+    icon: 'Stamp',
+  },
+  {
+    id: 'pdf-organize',
+    name: 'Organize PDF',
+    category: 'pdf',
+    shortDesc: 'Rotate, reorder, and delete individual PDF pages visually.',
+    badge: 'New',
+    icon: 'RotateCw',
   },
   {
     id: 'pdf-merge',
